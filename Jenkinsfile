@@ -40,11 +40,10 @@ pipeline {
             steps {
                 sh '''
                     docker stop ${CONTAINER_NAME} || true
-                    docker rm ${CONTAINER_NAME} || true
+                    docker rm -f ${CONTAINER_NAME} 2>/dev/null || true
                     docker pull ${IMAGE_NAME}:${IMAGE_TAG}
                     docker run -d -p 8099:80 --name ${CONTAINER_NAME} ${IMAGE_NAME}:${IMAGE_TAG}
                 '''
             }
         }
     }
-}
