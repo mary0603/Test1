@@ -1,19 +1,48 @@
 pipeline {
     agent any
 
+    environment {
+        IMAGE_NAME = "mfblessed078/portfolio-site1"
+        IMAGE_TAG = "latest"
+        CONTAINER_NAME = "portfolio-container1"
+    }
+
     stages {
-        stage('Build Docker Image') {
+
+        stage('Code Pull') {
             steps {
-                sh 'docker build -t portfolio-site .'
+                checkout scm
             }
         }
 
-        stage('Run Container') {
+        stage('Image Build') {
+            steps {
+                sh 'docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .'
+            }
+        }
+
+        stage('Push Image') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh '''
+                        echo "${DOCKER_PASS}" | docker login -u "${DOCKER_USER}" --password-stdin
+                        docker push ${IMAGE_NAME}:${IMAGE_TAG}
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy') {
             steps {
                 sh '''
-                docker stop portfolio-container || true
-                docker rm portfolio-container || true
-                docker run -d -p 8088:80 --name portfolio-container portfolio-site
+                    docker stop ${CONTAINER_NAME} || true
+                    docker rm ${CONTAINER_NAME} || true
+                    docker pull ${IMAGE_NAME}:${IMAGE_TAG}
+                    docker run -d -p 8089:80 --name ${CONTAINER_NAME} ${IMAGE_NAME}:${IMAGE_TAG}
                 '''
             }
         }
