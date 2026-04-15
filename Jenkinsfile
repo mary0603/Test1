@@ -2,9 +2,9 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "mfblessed078/portfolio-site1"
+        IMAGE_NAME = "mfblessed078/portfolio-site2"
         IMAGE_TAG = "latest"
-        CONTAINER_NAME = "portfolio-container1"
+        CONTAINER_NAME = "portfolio-container2"
     }
 
     stages {
@@ -42,7 +42,7 @@ pipeline {
                     docker stop ${CONTAINER_NAME} || true
                     docker rm ${CONTAINER_NAME} || true
                     docker pull ${IMAGE_NAME}:${IMAGE_TAG}
-                    docker run -d -p 8089:80 --name ${CONTAINER_NAME} ${IMAGE_NAME}:${IMAGE_TAG}
+                    docker run -d -p 8099:80 --name ${CONTAINER_NAME} ${IMAGE_NAME}:${IMAGE_TAG}
                 '''
             }
         }
